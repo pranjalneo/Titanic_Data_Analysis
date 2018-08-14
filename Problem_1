@@ -1,0 +1,49 @@
+we will find the average age of males and females who died in the Titanic tragedy.
+
+Now from the mapper, we will derive:
+gender as key
+age as values
+These values will be passed to the shuffle and sort phase and are further sent to the reducer phase where the aggregation of the values is performed.
+
+MAPPER CODE :
+
+public class Average_age {
+public static class Map extends Mapper<LongWritable, Text, Text, IntWritable> {
+private Text gender = new Text();
+private IntWritable age = new IntWritable();
+public void map(LongWritable key, Text value, Context context ) throws IOException, InterruptedException {
+   String line = value.toString();
+   String str[]=line.split(",");
+         if(str.length>6){
+             gender.set(str[4]);
+         if((str[1].equals("0")) ){
+            if(str[5].matches("\\d+")){
+              int i=Integer.parseInt(str[5]);
+                age.set(i);
+    }
+   }
+ }
+    context.write(gender, age);
+  }
+}
+
+REDUCER CODE :
+
+public static class Reduce extends Reducer<Text,IntWritable, Text, IntWritable> {
+public void reduce(Text key, Iterable<IntWritable> values, Context context)
+ throws IOException, InterruptedException {
+ int sum = 0;
+ int l=0;
+ for (IntWritable val : values) {
+ l+=1;
+ sum += val.get();
+ }
+ sum=sum/l;
+ context.write(key, new IntWritable(sum));
+   }
+ }
+ 
+ CONFIGURATION CODE :
+ 
+ job.setMapOutputKeyClass(Text.class);
+ job.setMapOutputValueClass(IntWritable.class);
