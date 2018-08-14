@@ -1,0 +1,36 @@
+we will find the number of people died or survived in each class with their genders and ages.
+
+Source code:
+
+public class Female_survived {
+public static class Map extends Mapper<LongWritable, Text, Text, IntWritable> {‘
+private Text people = new Text();
+private final static IntWritable one = new IntWritable(1);
+public void map(LongWritable key, Text value, Context context ) throws IOException, InterruptedException {
+  String line = value.toString();
+  String str[]=line.split(",");
+  if(str.length>6){
+  String survived=str[1]+" "+str[4]+" "+str[5];
+  people.set(survived);
+  context.write(people, one);
+  }
+ }
+}
+
+Reducer code:
+
+public static class Reduce extends Reducer<Text,IntWritable, Text, IntWritable> {
+public void reduce(Text key, Iterable<IntWritable> values, Context context)
+   throws IOException, InterruptedException {
+   int sum = 0;
+   for (IntWritable val : values) {
+   sum += val.get();
+  }
+  context.write(key, new IntWritable(sum));
+ }
+}
+
+Configuration code:
+
+job.setMapOutputKeyClass(Text.class);
+job.setMapOutputValueClass(IntWritable.class);
